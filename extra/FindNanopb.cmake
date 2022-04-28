@@ -126,6 +126,12 @@ function(NANOPB_GENERATE_CPP SRCS HDRS)
     return()
   endif()
 
+  set(_nanopb_include_path)
+  if(NANOPB_GENERATE_CPP_RELPATH)
+    get_filename_component(ABS_ROOT ${NANOPB_GENERATE_CPP_RELPATH} ABSOLUTE)
+    list(APPEND _nanopb_include_path "-I${ABS_ROOT}")
+  endif()
+
   if(NANOPB_GENERATE_CPP_APPEND_PATH)
     # Create an include path for each file specified
     foreach(FIL ${NANOPB_GENERATE_CPP_UNPARSED_ARGUMENTS})
@@ -134,11 +140,7 @@ function(NANOPB_GENERATE_CPP SRCS HDRS)
       list(APPEND _nanopb_include_path "-I${ABS_PATH}")
     endforeach()
   else()
-    set(_nanopb_include_path "-I${CMAKE_CURRENT_SOURCE_DIR}")
-  endif()
-
-  if(NANOPB_GENERATE_CPP_RELPATH)
-    list(APPEND _nanopb_include_path "-I${NANOPB_GENERATE_CPP_RELPATH}")
+    list(APPEND _nanopb_include_path "-I${CMAKE_CURRENT_SOURCE_DIR}")
   endif()
 
   if(DEFINED NANOPB_IMPORT_DIRS)
@@ -192,9 +194,6 @@ function(NANOPB_GENERATE_CPP SRCS HDRS)
         VERBATIM)
   endforeach()
 
-  if(NANOPB_GENERATE_CPP_RELPATH)
-      get_filename_component(ABS_ROOT ${NANOPB_GENERATE_CPP_RELPATH} ABSOLUTE)
-  endif()
   foreach(FIL ${NANOPB_GENERATE_CPP_UNPARSED_ARGUMENTS})
     get_filename_component(ABS_FIL ${FIL} ABSOLUTE)
     get_filename_component(FIL_WE ${FIL} NAME_WLE)
@@ -307,7 +306,8 @@ endfunction()
 # By default have NANOPB_GENERATE_CPP macro pass -I to protoc
 # for each directory where a proto file is referenced.
 if(NOT DEFINED NANOPB_GENERATE_CPP_APPEND_PATH)
-  set(NANOPB_GENERATE_CPP_APPEND_PATH TRUE)
+  set(NANOPB_GENERATE_CPP_APPEND_PATH TRUE CACHE BOOL "add path of each proto file to include path")
+  mark_as_advanced(NANOPB_GENERATE_CPP_APPEND_PATH)
 endif()
 
 # Make a really good guess regarding location of NANOPB_SRC_ROOT_FOLDER
